@@ -1,0 +1,92 @@
+version: '3'
+services:
+
+  postgres:
+    image: postgres:13.3
+    restart: on-failure
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./dump-movies.dump:/dump-movies.dump
+      - ./restore.sh:/docker-entrypoint-initdb.d/restore.sh
+    expose:
+      - "5432"
+    environment: &postgres_env
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_OPTIONS: ${POSTGRES_OPTIONS}
+
+  elasticsearch:
+    image: elasticsearch:8.10.2
+    expose:
+      - "9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health?wait_for_status=green&timeout=50s || exit 1"]
+      interval: 10s
+      timeout: 60s
+      retries: 3
+
+  redis:
+    image: redis:7.2.0
+    restart: on-failure
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    
+  etl:
+    build: etl
+    restart: on-failure
+    volumes:
+      - ./etl/data:/usr/src/app/data
+    environment:
+      <<: *postgres_env
+      DEBUG: ${DEBUG}
+      ELASTICSEARCH_HOST: http://elasticsearch:9200
+      ELASTICSEARCH_SCHEMAS_DIR: ${ELASTICSEARCH_SCHEMAS_DIR}
+      JSON_STATE_PATH: ${JSON_STATE_PATH}
+      LIMIT: ${LIMIT}
+    depends_on:
+      - postgres
+      - elasticsearch
+
+  async_api:
+    build: async_api
+    restart: on-failure
+    expose:
+      - "8000"
+    environment:
+      ELASTIC_HOST: http://elasticsearch
+      REDIS_HOST: redis
+    depends_on:
+      - elasticsearch
+      - redis
+
+  nginx:
+    image: nginx:1.25.1
+    restart: on-failure
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - async_api
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  elasticsearch_data:
+  redis_data:

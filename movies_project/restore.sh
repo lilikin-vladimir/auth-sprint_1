@@ -1,0 +1,1 @@
+pg_restore -U app -Fc -w -d movies_project dump-movies.dump
