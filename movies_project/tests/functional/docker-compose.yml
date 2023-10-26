@@ -1,0 +1,70 @@
+version: '3'
+services:
+
+  elasticsearch_test:
+    image: elasticsearch:8.10.2
+    expose:
+      - "19200"
+    volumes:
+      - elasticsearch_backup:/tmp/elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - http.port=19200
+      - path.repo=/tmp/elasticsearch
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail elasticsearch_test:19200/_cluster/health?wait_for_status=green&timeout=50s || exit 1"]
+      interval: 10s
+      timeout: 60s
+      retries: 3
+
+  redis_test:
+    image: redis:7.2.0
+    restart: on-failure
+    command: --port 16379
+    expose:
+      - "16379"
+    ports:
+      - "16379:16379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "16379", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  async_api:
+    build: ../../async_api
+    restart: on-failure
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    environment:
+      ELASTIC_HOST: http://elasticsearch_test
+      ELASTIC_PORT: 19200
+      REDIS_HOST: redis_test
+      REDIS_PORT: 16379
+    depends_on:
+      - elasticsearch_test
+      - redis_test
+
+  api_tests:
+    build: utils/.
+    volumes:
+      - ../.:/tests
+      - ./testdata/backup.tar.gz:/tmp/elasticsearch/backup.tar.gz
+      - elasticsearch_backup:/tmp/elasticsearch
+    command: ["pytest", "/tests/functional"]
+    environment:
+      ELASTIC_HOST: http://elasticsearch_test
+      ELASTIC_PORT: 19200
+      REDIS_HOST: redis_test
+      REDIS_PORT: 16379
+      BASE_URL: 'http://async_api:8000/api/v1'
+    depends_on:
+      - elasticsearch_test
+      - redis_test
+
+volumes:
+  elasticsearch_backup:

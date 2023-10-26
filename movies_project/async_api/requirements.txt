@@ -1,0 +1,22 @@
+elasticsearch[async]==8.9.0
+fastapi==0.101.0
+flake8==6.1.0
+orjson==3.9.4
+pydantic==2.1.1
+python-dotenv==1.0.0
+redis==4.6.0
+uvicorn==0.23.2
+uvloop==0.17.0 ; sys_platform != "win32" and implementation_name == "cpython"
+gunicorn==21.2.0
+pydantic-settings==2.0.2
+
+SQLAlchemy==1.4.49
+
+pytest==7.4.0
+pytest-aiohttp == 1.0.4
+pytest-asyncio==0.21.0
+pytest-redis==3.0.2
+httpx==0.24.0
+
+fastapi-cache2[redis] == 0.2.1
+asyncio == 3.4.3
