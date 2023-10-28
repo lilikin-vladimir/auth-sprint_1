@@ -54,3 +54,9 @@ class Crypt(BaseSettings):
 
 security_config = Crypt()
 config = AppConfig()
+
+ROLE_TITLE_DESC = 'Roles title'
+PERMISSIONS_DESC = 'Permission for the role'
+FIRST_NAME_DESC = 'User\'s first name'
+LAST_NAME_DESC = 'User\'s last name'
+USER_DISABLED_DESC = 'True - inactive, False - active'
