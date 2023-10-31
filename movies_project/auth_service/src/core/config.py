@@ -27,7 +27,6 @@ class Settings(BaseSettings):
     # Настройки Redis
     redis_host: str = Field(env='REDIS_HOST', default='127.0.0.1')
     redis_port: int = Field(env='REDIS_PORT', default=6379)
-    cache_expire_time: int = Field(env='REDIS_EXPIRE_TIME', default=300)
 
     # Настройки аутентификации
     secret_key_access: str = Field(
