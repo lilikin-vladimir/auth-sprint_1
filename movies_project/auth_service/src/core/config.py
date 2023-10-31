@@ -44,6 +44,10 @@ class Settings(BaseSettings):
         env='REFRESH_TOKEN_EXPIRE_TIME', default=7 * 24 * 60
     )  # в минутах
 
+    # Настройки суперпользователя
+    admin_email: str = Field(env='ADMIN_EMAIL', default='admin@example.com')
+    admin_password: str = Field(env='ADMIN_PASSWORD', default='Password123')
+
     class Config:
         env_file = '.env'
 
