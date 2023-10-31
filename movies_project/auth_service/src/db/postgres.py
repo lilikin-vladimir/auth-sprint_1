@@ -20,6 +20,8 @@ async_session = async_sessionmaker(
     expire_on_commit=False
 )
 
+db_session: AsyncSession | None
+
 
 # Функция понадобится при внедрении зависимостей
 async def get_async_session() -> AsyncSession:

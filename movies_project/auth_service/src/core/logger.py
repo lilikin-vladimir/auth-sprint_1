@@ -8,6 +8,7 @@ LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 LOG_DEFAULT_HANDLERS = ['console', 'file']
 LOG_LEVEL = 'DEBUG'
 LOG_FILE = 'auth.log'
+DEBUG = (LOG_LEVEL == 'DEBUG')
 
 LOGGING = {
     'version': 1,
