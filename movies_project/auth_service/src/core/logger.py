@@ -1,17 +1,20 @@
-from core.config import config
-
 # В логгере настраивается логгирование uvicorn-сервера.
 # Про логирование в Python можно прочитать в документации
 # https://docs.python.org/3/howto/logging.html
 # https://docs.python.org/3/howto/logging-cookbook.html
 
 
+LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+LOG_DEFAULT_HANDLERS = ['console', 'file']
+LOG_LEVEL = 'DEBUG'
+LOG_FILE = 'auth.log'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': config.log_format
+            'format': LOG_FORMAT
         },
         'default': {
             '()': 'uvicorn.logging.DefaultFormatter',
@@ -26,7 +29,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': config.log_level,
+            'level': LOG_LEVEL,
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
@@ -42,17 +45,17 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': config.log_file,
+            'filename': LOG_FILE,
             'mode': 'w',
-            'level': config.log_level,
+            'level': LOG_LEVEL,
             'encoding': "utf-8",
             'formatter': 'verbose'
         },
     },
     'loggers': {
         '': {
-            'handlers': config.log_default_handlers,
-            'level': config.log_level,
+            'handlers': LOG_DEFAULT_HANDLERS,
+            'level': LOG_LEVEL,
             'formatter': 'verbose',
         },
         'uvicorn.error': {
@@ -63,8 +66,8 @@ LOGGING = {
         },
     },
     'root': {
-        'level': config.log_level,
+        'level': LOG_LEVEL,
         'formatter': 'verbose',
-        'handlers': config.log_default_handlers,
+        'handlers': LOG_DEFAULT_HANDLERS,
     },
 }

@@ -7,8 +7,11 @@ from core.config import config
 Base = declarative_base(metadata=MetaData(schema='auth'))
 
 engine = create_async_engine(
-    config.postgres_db_dns,
-    echo=config.postgres_echo,
+    f'postgresql+asyncpg://'
+    f'{config.db_user}:{config.db_password}@'
+    f'{config.db_host}:{config.db_port}/'
+    f'{config.db_name}',
+    echo=config.db_echo_engine,
     future=True
 )
 
