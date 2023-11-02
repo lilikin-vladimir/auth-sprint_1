@@ -1,10 +1,8 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field, EmailStr, constr
+from pydantic import BaseModel, Field, EmailStr
 from core import config
-
-password_pattern = '^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$'
 
 
 class UserEmail(BaseModel):
@@ -12,9 +10,7 @@ class UserEmail(BaseModel):
 
 
 class UserLogin(UserEmail):
-    password: constr(min_length=8,
-                     max_length=50,
-                     pattern=password_pattern)
+    password: str = Field(..., min_length=8, max_length=50)
 
 
 class UserData(BaseModel):

@@ -5,14 +5,11 @@ from logging import config as logging_config
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-from redis import asyncio as aioredis
 
 from core import logger
 from core.config import config
 from db import redis, postgres
-from api.v1 import auth, users
+from api.v1 import auth
 
 logging_config.dictConfig(logger.LOGGING)
 
@@ -28,16 +25,15 @@ async def shutdown():
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    redis.redis = aioredis.from_url(f'redis://{config.redis_host}:{config.redis_port}')
-    FastAPICache.init(RedisBackend(redis.redis), prefix="fastapi-cache", expire=config.cache_expire_time)
+async def lifespan(app_: FastAPI):
+    await startup()
     yield
-    await redis.redis.close()
+    await shutdown()
 
-
-logging_config.dictConfig(logger.LOGGING)
 app = FastAPI(
-    title=config.project_name,
+    title=config.app_name,
+    description='API for users auth',
+    version='1.0.0',
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
@@ -45,14 +41,13 @@ app = FastAPI(
 )
 
 app.include_router(auth.router, prefix='/api/v1/auth', tags=['auth'])
-app.include_router(users.router, prefix='/api/v1/users', tags=['users'])
 
 
 if __name__ == '__main__':
     uvicorn.run(
         'main:app',
-        host='0.0.0.0',
-        port=8000,
+        host=config.app_host,
+        port=config.app_port,
         log_config=logger.LOGGING,
         log_level=logging.DEBUG,
     )
