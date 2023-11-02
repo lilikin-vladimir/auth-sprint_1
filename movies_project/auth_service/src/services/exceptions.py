@@ -26,10 +26,24 @@ invalid_access_token_exception = HTTPException(
             headers={"WWW-Authenticate": "Bearer"},
 )
 
+permission_denied = HTTPException(
+    status_code=status.HTTP_403_FORBIDDEN,
+    detail="You do not have permission to perform this action.",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+
 
 def user_already_exists_exception(email: str) -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail=f"User with email {email} already exists",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+def role_not_found(role_id: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Role with id {role_id} not found",
         headers={"WWW-Authenticate": "Bearer"},
     )
