@@ -14,8 +14,12 @@ class RoleCreate(BaseModel):
                              description=config.PERMISSIONS_DESC)
 
 
+class AddRole(BaseModel):
+    role_id: UUID
+
+
 class RoleInDB(RoleCreate):
     id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True

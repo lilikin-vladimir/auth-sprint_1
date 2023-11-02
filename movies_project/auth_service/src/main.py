@@ -11,7 +11,20 @@ from redis import asyncio as aioredis
 
 from core import logger
 from core.config import config
-from db import redis
+from db import redis, postgres
+from api.v1 import auth, users
+
+logging_config.dictConfig(logger.LOGGING)
+
+
+async def startup():
+    redis.cache = redis.get_session()
+    postgres.db_session = postgres.get_async_session()
+
+
+async def shutdown():
+    await redis.cache.close()
+    await postgres.db_session.close()
 
 
 @asynccontextmanager
@@ -30,6 +43,9 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan,
 )
+
+app.include_router(auth.router, prefix='/api/v1/auth', tags=['auth'])
+app.include_router(users.router, prefix='/api/v1/users', tags=['users'])
 
 
 if __name__ == '__main__':
