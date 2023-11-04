@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -20,6 +21,11 @@ class Token(BaseModel):
     refresh_token: str = None
     refresh_token_expires: datetime | int = None
     token_type: str = 'bearer'
+
+
+class TokenPayload(BaseModel):
+    sub: UUID
+    exp: datetime | int = None
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -117,5 +123,9 @@ async def add_invalid_access_token_to_cache(token: Token,
     await cache.set(f'invalid-access-token:{token.access_token}',
                     sub, cache_expire)
 
+
+async def get_user_id_from_token(token: Token) -> UUID:
+    user_id, _ = await decode_token(token.access_token, config.secret_key_access)
+    return UUID(user_id)
 
 TokenDep = Annotated[Token, Depends(check_access_token)]

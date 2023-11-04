@@ -31,11 +31,18 @@ class UserSignUp(UserLogin, UserData):
     pass
 
 
+class UserForUpdate(BaseModel):
+    email: EmailStr
+    new_email: EmailStr
+    password: str = Field(..., min_length=8, max_length=50)
+    new_password: str = Field(..., min_length=8, max_length=50)
+
+
 class UserResponseData(UserEmail, UserData):
     id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserInDB(UserEmail, UserData):
@@ -54,5 +61,8 @@ class UserRoleInDB(UserRoleCreate):
 
 class UserHistory(BaseModel):
     user_id: UUID
-    source: str = None
+    source: str | None
     login_time: datetime
+
+    class Config:
+        from_attributes = True
