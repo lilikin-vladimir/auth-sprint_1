@@ -33,6 +33,13 @@ permission_denied = HTTPException(
 )
 
 
+role_already_exists = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Role with this title already exists.",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+
+
 def user_already_exists_exception(email: str) -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

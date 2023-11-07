@@ -9,7 +9,7 @@ from fastapi.responses import ORJSONResponse
 from core import logger
 from core.config import config
 from db import redis, postgres
-from api.v1 import auth, users
+from api.v1 import auth, users, roles
 
 logging_config.dictConfig(logger.LOGGING)
 
@@ -42,6 +42,7 @@ app = FastAPI(
 
 app.include_router(auth.router, prefix='/api/v1/auth', tags=['auth'])
 app.include_router(users.router, prefix='/api/v1/users', tags=['users'])
+app.include_router(roles.router, prefix='/api/v1/roles', tags=['roles'])
 
 
 if __name__ == '__main__':
