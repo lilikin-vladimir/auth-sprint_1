@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:16.0
+    healthcheck:
+      test: "pg_isready"
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - ".env.deploy"
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - func_test_nw
+
+  redis:
+    image: redis:7.2.3
+    env_file:
+      - ".env.deploy"
+    ports:
+      - "${REDIS_PORT}:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis_data:/data
+    networks:
+      - func_test_nw
+
+  auth_service:
+    extends:
+      file: ../../../docker-compose.yml
+      service: auth_service
+    env_file:
+      - ".env.deploy"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - func_test_nw
+
+  tests:
+    build:
+      context: ../
+      dockerfile: functional/Dockerfile
+    env_file:
+      - ".env.deploy"
+    ports:
+      - 8001:8001
+    depends_on:
+      - auth_service
+    networks:
+      - func_test_nw
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  func_test_nw:
+    name: func_test_nw
+  backend:
