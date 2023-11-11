@@ -2,7 +2,7 @@ version: '3'
 
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:16.0
     restart: on-failure
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -10,14 +10,14 @@ services:
       - "5432"
     environment:
       POSTGRES_HOST: postgres
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - backend
 
   redis:
-    image: redis:latest
+    image: redis:7.2.3
     restart: on-failure
     expose:
       - "6379"
@@ -45,7 +45,7 @@ services:
       - backend
 
   nginx:
-    image: nginx:latest
+    image: nginx:1.25.3
     restart: on-failure
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro

@@ -12,40 +12,40 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class Settings(BaseSettings):
     # Настройки приложения
-    app_name: str = Field(env='APP_NAME', default='movies')
-    app_host: str = Field(env='APP_HOST', default='127.0.0.1')
-    app_port: int = Field(env='APP_PORT', default=8080)
+    app_name: str = Field(alias='APP_NAME', default='movies')
+    app_host: str = Field(alias='APP_HOST', default='127.0.0.1')
+    app_port: int = Field(alias='APP_PORT', default=8080)
 
     # Настройки БД
-    db_name: str = Field(env='DB_NAME', default='movies_database')
-    db_user: str = Field(env='DB_USER', default='app')
-    db_password: str = Field(env='DB_PASSWORD', default='password')
-    db_host: str = Field(env='DB_HOST', default='127.0.0.1')
-    db_port: int = Field(env='DB_PORT', default=5432)
-    db_echo_engine: bool = Field(env='DB_ECHO_ENGINE', default=False)
+    db_name: str = Field(alias='POSTGRES_DB', default='movies_database')
+    db_user: str = Field(alias='POSTGRES_USER', default='app')
+    db_password: str = Field(alias='POSTGRES_PASSWORD', default='password')
+    db_host: str = Field(alias='POSTGRES_HOST', default='127.0.0.1')
+    db_port: int = Field(alias='POSTGRES_PORT', default=5432)
+    db_echo_engine: bool = Field(alias='POSTGRES_ECHO_ENGINE', default=False)
 
     # Настройки Redis
-    redis_host: str = Field(env='REDIS_HOST', default='127.0.0.1')
-    redis_port: int = Field(env='REDIS_PORT', default=6379)
+    redis_host: str = Field(alias='REDIS_HOST', default='127.0.0.1')
+    redis_port: int = Field(alias='REDIS_PORT', default=6379)
 
     # Настройки аутентификации
     secret_key_access: str = Field(
-        env='SECRET_KEY_ACCESS', default='secret'
+        alias='SECRET_KEY_ACCESS', default='secret'
     )
     secret_key_refresh: str = Field(
-        env='SECRET_KEY_REFRESH', default='secret'
+        alias='SECRET_KEY_REFRESH', default='secret'
     )
-    algorithm: str = Field(env='ALGORITHM', default='HS256')
+    algorithm: str = Field(alias='ALGORITHM', default='HS256')
     access_token_expire_time: int = Field(
-        env='ACCESS_TOKEN_EXPIRE_TIME', default=15
+        alias='ACCESS_TOKEN_EXPIRE_TIME', default=15
     )  # в минутах
     refresh_token_expire_time: int = Field(
-        env='REFRESH_TOKEN_EXPIRE_TIME', default=7 * 24 * 60
+        alias='REFRESH_TOKEN_EXPIRE_TIME', default=7 * 24 * 60
     )  # в минутах
 
     # Настройки суперпользователя
-    admin_email: str = Field(env='ADMIN_EMAIL', default='admin@example.com')
-    admin_password: str = Field(env='ADMIN_PASSWORD', default='Password123')
+    admin_email: str = Field(alias='ADMIN_EMAIL', default='admin@example.com')
+    admin_password: str = Field(alias='ADMIN_PASSWORD', default='Password123')
 
     class Config:
         env_file = '.env'
