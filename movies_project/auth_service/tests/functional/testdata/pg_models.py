@@ -27,12 +27,14 @@ class User(Base):
 
     def __init__(
         self,
+        id: str,
         email: str,
         password: str,
         first_name: str = None,
         last_name: str = None,
         disabled: bool = False
     ) -> None:
+        self.id = id
         self.email = email
         self.password = pwd_context.hash(password)
         self.first_name = first_name if first_name else ''
@@ -50,7 +52,8 @@ class Role(Base):
     permissions = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    def __init__(self, title: str, permissions: int) -> None:
+    def __init__(self, id: str, title: str, permissions: int) -> None:
+        self.id = id
         self.title = title
         self.permissions = permissions
 
@@ -65,7 +68,8 @@ class UserRole(Base):
     role_id = Column(UUID, ForeignKey('roles.id', ondelete='CASCADE'), nullable=False)
     user_role_idx = UniqueConstraint('user_id', 'role_id')
 
-    def __init__(self, user_id: UUID, role_id: UUID) -> None:
+    def __init__(self, id: str, user_id: str, role_id: str) -> None:
+        self.id = id
         self.user_id = user_id
         self.role_id = role_id
 
@@ -82,8 +86,9 @@ class LoginHistory(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     def __init__(
-        self, user_id: UUID, source: str = None
+        self, id: str, user_id: str, source: str = None
     ) -> None:
+        self.id = id
         self.user_id = user_id
         self.source = source
         self.login_time = self.login_time
