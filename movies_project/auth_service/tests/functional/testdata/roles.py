@@ -1,11 +1,12 @@
 import uuid
+from faker import Faker
 from random import randint
 from dataclasses import dataclass
 
 from .pg_models import Role, UserRole
 
 
-ROLE_TITLES = ['admins', 'staff', 'user']
+fake = Faker('ru_RU')
 
 
 @dataclass
@@ -24,7 +25,7 @@ class FakeUserRole():
 
 def get_role() -> tuple[Role, FakeRole]:
     data = {
-        'title': ROLE_TITLES[randint(0, len(ROLE_TITLES) - 1)],
+        'title': fake.user_name(),
         'permissions': randint(0, 10),
         'id': str(uuid.uuid4())
     }

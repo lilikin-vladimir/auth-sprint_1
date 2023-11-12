@@ -35,7 +35,6 @@ async def async_session(async_connection: AsyncConnection):
 def pg_add_instances(async_session: AsyncSession):
     async def inner(instances: list):
         try:
-            print(async_session)
             async_session.add_all(instances)
             await async_session.commit()
         except Exception as err:
