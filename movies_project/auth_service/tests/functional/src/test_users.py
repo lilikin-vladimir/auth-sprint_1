@@ -1,7 +1,7 @@
-from http import HTTPStatus
 import pytest
 import uuid
 from aiohttp import ClientResponse
+from http import HTTPStatus
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
