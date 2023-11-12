@@ -31,6 +31,7 @@ def make_request(aiohttp_session: aiohttp.ClientSession):
         'get': aiohttp_session.get,
         'post': aiohttp_session.post,
         'put': aiohttp_session.put,
+        'delete': aiohttp_session.delete,
     }
 
     async def inner(url, method='get', params={}, data={}, token=None):
@@ -38,7 +39,7 @@ def make_request(aiohttp_session: aiohttp.ClientSession):
         headers = {}
         if token:
             headers['Authorization'] = f'Bearer {token}'
-        async with request_type[method.lower()](url, params=params, data=data, headers=headers) as response:
+        async with request_type[method.lower()](url, params=params, json=data, headers=headers) as response:
             await response.json()
             return response
 

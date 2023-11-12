@@ -1,5 +1,6 @@
 aiohttp==3.8.5
 backoff-utils==1.0.1
+faker==20.0.0
 flake8==6.0.0
 pydantic==2.3.0
 pydantic-settings==2.0.3
