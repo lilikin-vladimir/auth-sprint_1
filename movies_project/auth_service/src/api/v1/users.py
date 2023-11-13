@@ -2,13 +2,16 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter
+from fastapi_pagination import Page
 
 from schemas.roles import RoleInDB, AddRole
 from schemas.users import UserResponseData, UserForUpdate, UserHistory
 from services.auth import TokenDep, get_user_id_from_token
 from services.database import DbDep
 from services.exceptions import wrong_username_or_password_exception, permission_denied
-from services.users import get_history, update_user_credentials, get_role, add_role, remove_role
+from services.users import (
+    get_paginated_history, update_user_credentials, get_role, add_role, remove_role
+)
 
 
 router = APIRouter()
@@ -33,7 +36,7 @@ async def update_credentials(user: UserForUpdate, db: DbDep) -> UserResponseData
 @router.get(
     "/{user_id}/auth-history/",
     summary="История входов пользователя",
-    response_model=list[UserHistory],
+    response_model=Page[UserHistory],
     description="Получить историю входов пользователя",
     status_code=HTTPStatus.OK
 )
@@ -41,7 +44,7 @@ async def get_auth_history(user_id: UUID, token: TokenDep, db: DbDep) -> list[Us
     if await get_user_id_from_token(token) != user_id:
         raise permission_denied
 
-    return await get_history(user_id, db)
+    return await get_paginated_history(user_id, db)
 
 
 @router.get(

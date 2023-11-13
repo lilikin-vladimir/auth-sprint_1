@@ -122,19 +122,40 @@ async def test_delete_user_role(
     assert response.status == HTTPStatus.NO_CONTENT
 
 
-async def test_successfully_get_login_histories(get_token, make_request, pg_add_instances):
+@pytest.mark.parametrize(
+    'page, size, login_count, pages',
+    [
+        (1, 30, 1, 1),
+        (2, 2, 10, 10 / 2),
+        (1, 50, 3, 1),
+    ]
+)
+async def test_successfully_get_login_histories(
+    get_token, make_request, pg_add_instances,
+    page, size, login_count, pages,
+):
     user, fake_user = get_user()
     await pg_add_instances([user])
-    token = await get_token(data={'username': fake_user.email, 'password': fake_user.password})
-    response: ClientResponse = await make_request(f'/api/v1/users/{fake_user.id}/auth-history/', token=token)
+
+    for _ in range(login_count):
+        token = await get_token(data={'username': fake_user.email, 'password': fake_user.password})
+
+    response: ClientResponse = await make_request(
+        f'/api/v1/users/{fake_user.id}/auth-history/',
+        params={'page': page, 'size': size},
+        token=token
+    )
     body = await response.json()
 
     assert response.status == HTTPStatus.OK
-    assert len(body) == 1
-    assert body[0].get('login_time') is not None
-    assert body[0].get('user_id') is not None
-    assert body[0].get('source', '') != ''
-    assert body[0]['user_id'] == fake_user.id
+    assert body.get('total') == login_count
+    assert body.get('page') == page
+    assert body.get('size') == size
+    assert body.get('pages') == (1 if login_count <= size else login_count / size)
+    assert isinstance(body.get('items'), list)
+    assert len(body.get('items')) == (login_count if size >= login_count else size)
+    for i in body.get('items'):
+        assert i['user_id'] == fake_user.id
 
 
 async def test_successfully_update_creds(
