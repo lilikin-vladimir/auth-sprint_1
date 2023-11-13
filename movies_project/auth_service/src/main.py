@@ -5,6 +5,7 @@ from logging import config as logging_config
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_pagination import add_pagination
 
 from core import logger
 from core.config import config
@@ -43,6 +44,8 @@ app = FastAPI(
 app.include_router(auth.router, prefix='/api/v1/auth', tags=['auth'])
 app.include_router(users.router, prefix='/api/v1/users', tags=['users'])
 app.include_router(roles.router, prefix='/api/v1/roles', tags=['roles'])
+
+add_pagination(app)
 
 
 if __name__ == '__main__':

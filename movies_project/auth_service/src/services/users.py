@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import select, update, delete
 
 from models.users import User, pwd_context
@@ -66,9 +67,15 @@ async def update_user_credentials(user_for_update: UserForUpdate, db: DbDep):
     return user
 
 
-async def get_history(user_id: UUID, db: DbDep) -> list[LoginHistory]:
-    history = await db.scalars(select(LoginHistory).where(LoginHistory.user_id == user_id))
-    return history.all()
+async def get_paginated_history(user_id: UUID, db: DbDep) -> list[LoginHistory]:
+    return await paginate(
+        db,
+        (
+            select(LoginHistory)
+            .where(LoginHistory.user_id == user_id)
+            .order_by(LoginHistory.created_at)
+        )
+    )
 
 
 async def get_role(user_id: UUID, db: DbDep) -> UserRole | None:
