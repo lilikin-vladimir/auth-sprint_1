@@ -10,10 +10,10 @@ from tests.functional.testdata.users import get_user
 from tests.functional.testdata.roles import get_role, Role
 
 
+pytestmark = pytest.mark.asyncio
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
-@pytest.mark.asyncio
 async def test_get_roles(get_token, make_request, pg_add_instances):
     response: ClientResponse = await make_request('/api/v1/roles/')
     assert response.status == HTTPStatus.UNAUTHORIZED
@@ -33,7 +33,6 @@ async def test_get_roles(get_token, make_request, pg_add_instances):
         assert fake_role.__dict__ in body
 
 
-@pytest.mark.asyncio
 async def test_create_role(async_session: AsyncSession, get_token, make_request, pg_add_instances):
     response: ClientResponse = await make_request('/api/v1/roles/', method='post')
     assert response.status == HTTPStatus.UNAUTHORIZED
@@ -51,7 +50,6 @@ async def test_create_role(async_session: AsyncSession, get_token, make_request,
     assert new_role is not None
 
 
-@pytest.mark.asyncio
 async def test_update_role(async_session: AsyncSession, get_token, make_request, pg_add_instances):
     response: ClientResponse = await make_request('/api/v1/roles/', method='post')
     assert response.status == HTTPStatus.UNAUTHORIZED
@@ -73,7 +71,6 @@ async def test_update_role(async_session: AsyncSession, get_token, make_request,
     assert body['id'] == fake_role.id == str(role.id)
 
 
-@pytest.mark.asyncio
 async def test_delete_role(async_session: AsyncSession, get_token, make_request, pg_add_instances):
     user, fake_user = get_user()
     role, fake_role = get_role()
