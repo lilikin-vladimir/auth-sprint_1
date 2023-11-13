@@ -10,10 +10,10 @@ from tests.functional.testdata.users import get_user
 from tests.functional.testdata.roles import get_role, get_user_role, UserRole
 
 
+pytestmark = pytest.mark.asyncio
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
-@pytest.mark.asyncio
 async def test_successfully_get_user_roles(get_token, make_request, pg_add_instances):
     # role is None
     user, fake_user = get_user()
@@ -35,7 +35,6 @@ async def test_successfully_get_user_roles(get_token, make_request, pg_add_insta
     assert body == {'id': fake_role.id, 'permissions': fake_role.permissions, 'title': fake_role.title}
 
 
-@pytest.mark.asyncio
 async def test_failed_get_user_roles(get_token, make_request, pg_add_instances):
     user, fake_user = get_user()
     await pg_add_instances([user])
@@ -52,7 +51,6 @@ async def test_failed_get_user_roles(get_token, make_request, pg_add_instances):
     assert response.status == HTTPStatus.UNAUTHORIZED
 
 
-@pytest.mark.asyncio
 async def test_successfully_set_user_role(get_token, make_request, pg_add_instances):
     user, fake_user = get_user()
     role, fake_role = get_role()
@@ -84,7 +82,6 @@ async def test_successfully_set_user_role(get_token, make_request, pg_add_instan
         ),
     ]
 )
-@pytest.mark.asyncio
 async def test_failed_set_user_role(
     get_token, make_request, pg_add_instances, query_data: dict, expected_answer: dict
 ):
@@ -98,7 +95,6 @@ async def test_failed_set_user_role(
     assert response.status == expected_answer['status']
 
 
-@pytest.mark.asyncio
 async def test_delete_user_role(
     async_session: AsyncSession, get_token, make_request, pg_add_instances
 ):
@@ -126,7 +122,6 @@ async def test_delete_user_role(
     assert response.status == HTTPStatus.NO_CONTENT
 
 
-@pytest.mark.asyncio
 async def test_successfully_get_login_histories(get_token, make_request, pg_add_instances):
     user, fake_user = get_user()
     await pg_add_instances([user])
@@ -142,7 +137,6 @@ async def test_successfully_get_login_histories(get_token, make_request, pg_add_
     assert body[0]['user_id'] == fake_user.id
 
 
-@pytest.mark.asyncio
 async def test_successfully_update_creds(
     async_session: AsyncSession, get_token, make_request, pg_add_instances
 ):
@@ -184,7 +178,6 @@ async def test_successfully_update_creds(
         ),
     ]
 )
-@pytest.mark.asyncio
 async def test_failed_update_creds(
     get_token, make_request, pg_add_instances,
     query_data: dict, expected_status: int,
