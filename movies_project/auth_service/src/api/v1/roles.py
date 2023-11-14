@@ -1,11 +1,11 @@
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from schemas.roles import RoleInDB, RoleCreate
-from services.auth import TokenDep
-from services.roles import RoleService, get_role_service
+from services.auth import AuthServiceDep
+from services.roles import RoleServiceDep
 
 
 router = APIRouter()
@@ -19,8 +19,11 @@ router = APIRouter()
     status_code=HTTPStatus.OK
 )
 async def get_all_roles(
-    _: TokenDep, role_service: RoleService = Depends(get_role_service)
+    token: str,
+    auth_service: AuthServiceDep,
+    role_service: RoleServiceDep
 ) -> list[RoleInDB]:
+    await auth_service.check_access_token(token)
     return await role_service.get_roles()
 
 
@@ -32,8 +35,11 @@ async def get_all_roles(
     status_code=HTTPStatus.CREATED
 )
 async def create_role(
-    role: RoleCreate, _: TokenDep, role_service: RoleService = Depends(get_role_service)
+    role: RoleCreate, token: str,
+    auth_service: AuthServiceDep,
+    role_service: RoleServiceDep
 ) -> RoleInDB:
+    await auth_service.check_access_token(token)
     return await role_service.create_role(role.title, role.permissions)
 
 
@@ -44,11 +50,11 @@ async def create_role(
     status_code=HTTPStatus.OK
 )
 async def update_role(
-    role_id: UUID,
-    role: RoleCreate,
-    _: TokenDep,
-    role_service: RoleService = Depends(get_role_service)
+    role_id: UUID, role: RoleCreate, token: str,
+    auth_service: AuthServiceDep,
+    role_service: RoleServiceDep
 ) -> RoleInDB:
+    await auth_service.check_access_token(token)
     return await role_service.update_role(role_id, role.title, role.permissions)
 
 
@@ -59,8 +65,9 @@ async def update_role(
     status_code=HTTPStatus.NO_CONTENT
 )
 async def delete_role(
-    role_id: UUID,
-    _: TokenDep,
-    role_service: RoleService = Depends(get_role_service)
+    role_id: UUID, token: str,
+    auth_service: AuthServiceDep,
+    role_service: RoleServiceDep
 ) -> None:
+    await auth_service.check_access_token(token)
     await role_service.delete_role(role_id)

@@ -5,14 +5,16 @@ from fastapi import APIRouter
 from fastapi_pagination import Page
 
 from schemas.roles import RoleInDB, AddRole
-from schemas.users import UserResponseData, UserForUpdate, UserHistory
-from services.auth import TokenDep, get_user_id_from_token
-from services.database import DbDep
-from services.exceptions import wrong_username_or_password_exception, permission_denied
-from services.users import (
-    get_paginated_history, update_user_credentials, get_role, add_role, remove_role
+from schemas.users import (
+    UserResponseData, UserForUpdate,
+    UserHistory,
 )
-
+from services.auth import AuthServiceDep
+from services.users import UserServiceDep
+from services.exceptions import (
+    wrong_username_or_password_exception,
+    permission_denied,
+)
 
 router = APIRouter()
 
@@ -24,8 +26,10 @@ router = APIRouter()
     description="Обновить email и/или пароль пользователя",
     status_code=HTTPStatus.OK
 )
-async def update_credentials(user: UserForUpdate, db: DbDep) -> UserResponseData:
-    updated_user = await update_user_credentials(user, db)
+async def update_credentials(user: UserForUpdate,
+                             user_service: UserServiceDep
+                             ) -> UserResponseData:
+    updated_user = await user_service.update_user_credentials(user)
 
     if not updated_user:
         raise wrong_username_or_password_exception
@@ -40,11 +44,16 @@ async def update_credentials(user: UserForUpdate, db: DbDep) -> UserResponseData
     description="Получить историю входов пользователя",
     status_code=HTTPStatus.OK
 )
-async def get_auth_history(user_id: UUID, token: TokenDep, db: DbDep) -> list[UserHistory]:
-    if await get_user_id_from_token(token) != user_id:
+async def get_auth_history(user_id: UUID, token: str,
+                           user_service: UserServiceDep,
+                           auth_service: AuthServiceDep
+                           ) -> list[UserHistory]:
+    token = await auth_service.check_access_token(token)
+    if await auth_service.get_user_id_from_token(token) != user_id:
         raise permission_denied
 
-    return await get_paginated_history(user_id, db)
+    history_list = await user_service.get_paginated_history(user_id)
+    return history_list
 
 
 @router.get(
@@ -54,11 +63,16 @@ async def get_auth_history(user_id: UUID, token: TokenDep, db: DbDep) -> list[Us
     description="Получить текущую роль пользователя",
     status_code=HTTPStatus.OK
 )
-async def get_user_roles(user_id: UUID, token: TokenDep, db: DbDep) -> RoleInDB | None:
-    if await get_user_id_from_token(token) != user_id:
+async def get_user_roles(user_id: UUID, token: str,
+                         user_service: UserServiceDep,
+                         auth_service: AuthServiceDep
+                         ) -> RoleInDB | None:
+    token = await auth_service.check_access_token(token)
+    if await auth_service.get_user_id_from_token(token) != user_id:
         raise permission_denied
 
-    return await get_role(user_id, db)
+    role = await user_service.get_role(user_id)
+    return role
 
 
 @router.post(
@@ -67,11 +81,14 @@ async def get_user_roles(user_id: UUID, token: TokenDep, db: DbDep) -> RoleInDB 
     description="Установить роль пользователю",
     status_code=HTTPStatus.NO_CONTENT
 )
-async def add_user_role(user_id: UUID, role: AddRole, token: TokenDep, db: DbDep):
-    if await get_user_id_from_token(token) != user_id:
+async def add_user_role(user_id: UUID, role: AddRole, token: str,
+                        user_service: UserServiceDep,
+                        auth_service: AuthServiceDep) -> None:
+    token = await auth_service.check_access_token(token)
+    if await auth_service.get_user_id_from_token(token) != user_id:
         raise permission_denied
 
-    return await add_role(user_id, role.role_id, db)
+    await user_service.add_role(user_id, role.role_id)
 
 
 @router.delete(
@@ -80,8 +97,11 @@ async def add_user_role(user_id: UUID, role: AddRole, token: TokenDep, db: DbDep
     description="Удалить роль пользователя",
     status_code=HTTPStatus.NO_CONTENT
 )
-async def remove_user_role(user_id: UUID, token: TokenDep, db: DbDep):
-    if await get_user_id_from_token(token) != user_id:
+async def remove_user_role(user_id: UUID, token: str,
+                           user_service: UserServiceDep,
+                           auth_service: AuthServiceDep) -> None:
+    token = await auth_service.check_access_token(token)
+    if await auth_service.get_user_id_from_token(token) != user_id:
         raise permission_denied
 
-    return await remove_role(user_id, db)
+    await user_service.remove_role(user_id)
