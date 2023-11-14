@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     admin_email: str = Field(alias='ADMIN_EMAIL', default='admin@example.com')
     admin_password: str = Field(alias='ADMIN_PASSWORD', default='Password123')
 
+    # Настройки логирования
+    log_level: str = Field(alias='LOG_LEVEL', default='DEBUG')
+
     class Config:
         env_file = '.env'
 

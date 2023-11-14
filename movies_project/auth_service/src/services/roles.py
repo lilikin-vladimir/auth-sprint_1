@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 from functools import lru_cache
 
@@ -19,7 +20,9 @@ class RoleService:
         return roles.all()
 
     async def create_role(self, title: str, permissions: int) -> Role:
-        role = (await self.db.execute(select(Role).where(Role.title == title))).one_or_none()
+        role = (await self.db.execute(
+            select(Role).where(Role.title == title)
+        )).one_or_none()
         if role:
             raise role_already_exists
 
@@ -29,7 +32,8 @@ class RoleService:
         await self.db.refresh(role)
         return role
 
-    async def update_role(self, role_id: UUID, title: str, permissions: int) -> Role:
+    async def update_role(self, role_id: UUID, title: str,
+                          permissions: int) -> Role:
         role = await self.db.get(Role, role_id)
 
         if not role:
@@ -56,3 +60,6 @@ def get_role_service(
     db: AsyncSession = Depends(get_db_service),
 ) -> RoleService:
     return RoleService(db)
+
+
+RoleServiceDep = Annotated[RoleService, Depends(get_role_service)]

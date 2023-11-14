@@ -2,11 +2,11 @@
 # Про логирование в Python можно прочитать в документации
 # https://docs.python.org/3/howto/logging.html
 # https://docs.python.org/3/howto/logging-cookbook.html
-
+from core.config import config
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 LOG_DEFAULT_HANDLERS = ['console', 'file']
-LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = config.log_level
 LOG_FILE = 'auth.log'
 DEBUG = (LOG_LEVEL == 'DEBUG')
 
